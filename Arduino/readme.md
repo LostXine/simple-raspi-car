@@ -1,8 +1,8 @@
 # Simple Raspberry Pi Car - Arduino
 
 ### Hardware
-PIN 4  <- Raspberry PI: Enable
-PIN 9  -> Steering Servo
+PIN 4  <- Raspberry PI: Enable</br>
+PIN 9  -> Steering Servo</br>
 PIN 10 -> ESC
 
 ### Protocal
