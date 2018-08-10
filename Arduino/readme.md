@@ -8,11 +8,11 @@ PIN 10 -> ESC
 ### Protocal
 * General
 ```
-0x15 databytes XOR 0x51
-|start byte    |   |end byte
-               |XOR check byte from databytes
+0xFF databytes XOR 0xAF
+|start byte        |end byte
+                |XOR check byte from databytes
 ```
-Tips: All commands should begin with '0x15' and end at '0x51'
+Tips: All commands should begin with '0xFF' and end at '0xAF'
 
 Calculate XOR:
 ```
@@ -29,14 +29,14 @@ Command type:
 |Code|Type|
 |----|----|
 |0x0.|SET|
-|0xF.|GET|
+|0x1.|GET|
 |0x.0|Mode|
 |0x.1|Motor|
 |0x.2|Steering Servo|
 
 * SET Mode
 ```
-0x15 0x00 0x00 XOR 0x51
+0xFF 0x00 0x00 XOR 0xAF
           |mode number
           |0x00 stop         : stop the motor
           |0x01 const voltage: give the motor constant voltage
@@ -45,7 +45,7 @@ Command type:
 
 * SET Motor(Voltage/Speed)
 ```
-0x15 0x01 0x00 0x00 XOR 0x51
+0xFF 0x01 0x00 0x00 XOR 0xAF
           |mode direction
           |0x00 forward
           |else backward
@@ -55,7 +55,7 @@ Command type:
 
 * SET Steering Servo
 ```
-0x15 0x02 0x00 0x00 XOR 0x51
+0xFF 0x02 0x00 0x00 XOR 0xAF
           |mode direction
           |0x00 left
           |else right
@@ -65,13 +65,20 @@ Command type:
 
 * GET current setting
 ```
-0x15 0xF. 0x51
+0xFF 0x1. XOR 0xAF
      |get method
-     |0xF0 get mode
-     |0xF1 get motor
-     |0xF2 get steering servo
+     |0x10 get mode
+     |0x11 get motor
+     |0x12 get steering servo
 ```
 When Arduino receives 'GET', it will response 'SET' commands above.
+
+### Test cases
+* All stop: FF 00 00 00 AF
+* Forward 0.5: FF 01 00 32 33 AF FF 00 01 01 AF
+* Backward 0.3: FF 01 01 24 24 AF FF 00 01 01 AF
+* Get mode: FF 10 10 AF
+
 
 ### Contact me
 * Email: lostxine@gmail.com
