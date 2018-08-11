@@ -41,7 +41,7 @@ class DriveConsole:
         self._acc = 0.02
 
     def draw_status(self, img):
-        text = 'Motor: %6.2f Servo: %0.2f' % (self._motor, self._servo)
+        text = 'Motor: %0.2f Servo: %0.2f' % (self._motor, self._servo)
         text_size = 0.6
         text_font = cv2.FONT_HERSHEY_DUPLEX
         text_box = (260, 10)  # cv2.getTextSize(text, text_font, text_size, thickness=3)[0]
