@@ -29,14 +29,14 @@ make -j4
 * Python3:
 ```
 cd ./client/python3
-python3 ./raspi_car_demo.py
+python3 ./run_raspicar.py
 ```
 
 * C++:
 ```
 cd ./client/cpp
 sh ./compile.sh
-./run_picar
+./run_raspicar
 ```
 
 Edit clients to complete different tasks.

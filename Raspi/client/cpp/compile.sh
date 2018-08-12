@@ -1,1 +1,1 @@
-g++ -o run_picar -O run_picar.cpp -O driver.cpp -std=c++11 -lpthread
+g++ -o run_raspicar -O run_raspicar.cpp -O driver.cpp -std=c++11 -lpthread
