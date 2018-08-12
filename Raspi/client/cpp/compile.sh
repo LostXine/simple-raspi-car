@@ -1,1 +1,1 @@
-g++ -o run_raspicar -O run_raspicar.cpp -O driver.cpp -std=c++11 -lpthread
+g++ -o run_raspi_car -O run_raspi_car.cpp -O driver.cpp -std=c++11 -lpthread
