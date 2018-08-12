@@ -1,16 +1,25 @@
-# Simple Raspberry Pi Car - Arduino
+# Simple Raspberry Pi Car - Arduino Nano
+
+### Usage
+
+* Compile and upload
+
+1. include Chrono library in Arduino IDE (Sketch -> Include Library -> Manage Libraries..)
+2. compile and upload (Only tested on Arduino Nano)
 
 ### Hardware
+```
 PIN 4  <- Raspberry PI: Enable</br>
 PIN 9  -> Steering Servo</br>
 PIN 10 -> ESC
+```
 
 ### Protocal
 * General
 ```
 0xFF databytes XOR 0xAF
-|start byte        |end byte
-                |XOR check byte from databytes
+|start byte    |   |end byte
+               |XOR check byte from databytes
 ```
 Tips: All commands should begin with '0xFF' and end at '0xAF'
 
@@ -74,11 +83,22 @@ Command type:
 When Arduino receives 'GET', it will response 'SET' commands above.
 
 ### Test cases
-* All stop: FF 00 00 00 AF
-* Forward 0.5: FF 01 00 32 33 AF FF 00 01 01 AF
-* Backward 0.3: FF 01 01 24 24 AF FF 00 01 01 AF
-* Get mode: FF 10 10 AF
-
+* All stop: 
+```
+FF 00 00 00 AF
+```
+* Forward 0.5:
+```
+FF 01 00 32 33 AF FF 00 01 01 AF
+```
+* Backward 0.3: 
+```
+FF 01 01 24 24 AF FF 00 01 01 AF
+```
+* Get mode: 
+```
+FF 10 10 AF
+```
 
 ### Contact me
 * Email: lostxine@gmail.com

@@ -39,6 +39,8 @@ sh ./compile.sh
 ./run_picar
 ```
 
+Edit clients to complete different tasks.
+
 ### Server
 
 * Structure

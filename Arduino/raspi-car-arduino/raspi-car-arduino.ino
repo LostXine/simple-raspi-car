@@ -1,10 +1,10 @@
 /*
-simple-raspi-car: arduino code
+simple-raspi-car: Arduino Nano
 lostxine@gmail.com
 Aug.10, 2018
 Compile: 
-1.load Chrono lib in Arduino IDE
-2.compile
+1.include Chrono library in Arduino IDE (Sketch -> Include Library -> Manage Libraries..)
+2.compile and upload
 */
 
 //#define PRINT_ASCII       //reply ACSII chars when defined
