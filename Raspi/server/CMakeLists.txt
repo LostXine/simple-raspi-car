@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.2)
+
+PROJECT(raspicar_server)
+
+add_definitions(-std=c++11)
+FIND_PACKAGE(Threads  REQUIRED)
+
+INCLUDE_DIRECTORIES(
+    include
+    )
+
+AUX_SOURCE_DIRECTORY(src DIR_SRCS)
+
+SET(RASPICAR_SERVER
+    ${DIR_SRCS}
+    )
+
+ADD_EXECUTABLE(${PROJECT_NAME} ${RASPICAR_SERVER}) 
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} glog)
+
