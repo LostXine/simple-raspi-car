@@ -129,18 +129,18 @@ void pi_driver::launch_msg(unsigned char* src, int len, int tofetch){
     fetchmutex.unlock();
 }
 
-void pi_driver::set_cmd(unsigned char code, char v = 0){
+void pi_driver::set_cmd(unsigned char code, int v = 0){
     int len = 4;
     unsigned char buf[] = {START_FLAG, code, END_FLAG, END_FLAG, END_FLAG, END_FLAG, END_FLAG};
     // SET
     switch(code & 0x0f){
         case 0:
             len += 2; // add 2 bytes: code mode
-            buf[2] = std::max(std::min(0x01, int(v)), 0x00);
+            buf[2] = std::max(std::min(0x01, v), 0x00);
             break;
         default:
             len += 3; // add 3 bytes: code, direction, value
-            char value = std::max(std::min(100, int(v)), -100);
+            int value = std::max(std::min(100, v), -100);
             buf[3] = abs(value);
             buf[2] = (value > 0)? 0x00: 0x01;
     };
@@ -158,11 +158,13 @@ void pi_driver::set_mode(char v){
     set_cmd(0x00, v);
 }
 
-void pi_driver::set_motor(char v){
+void pi_driver::set_motor(int v){
+    LOG(INFO)<<"motor"<<int(v);
     set_cmd(0x01, v);
 }   
 
-void pi_driver::set_servo(char v){
+void pi_driver::set_servo(int v){
+    LOG(INFO)<<"servo"<<int(v);
     set_cmd(0x02, v);
 }
 

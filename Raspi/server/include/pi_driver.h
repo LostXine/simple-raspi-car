@@ -24,8 +24,8 @@ class pi_driver{
         // var :    -1 ---- 0 ---- 1
         //motor: backward  stop  forward
         //servo:   left    mid   right
-        void set_motor(char v);
-        void set_servo(char v);
+        void set_motor(int v);
+        void set_servo(int v);
 
         // query
         void query_mode();
@@ -51,7 +51,7 @@ class pi_driver{
         std::thread* fetching;
         void launch_msg(unsigned char* src, int len, int tofetch);
         void transfer_response(unsigned char* src, int fin);
-        void set_cmd(unsigned char code, char v);
+        void set_cmd(unsigned char code, int v);
         unsigned int assemble_bytes(unsigned char a, unsigned char b);
         void* udp = nullptr;
         
