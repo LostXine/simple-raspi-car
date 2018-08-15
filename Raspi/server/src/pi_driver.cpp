@@ -109,7 +109,7 @@ unsigned int pi_driver:: get_CRC16(unsigned char* src, int start, int fin){
     unsigned char CRCHi = 0xFF ; /* high byte of CRC16 initialized */
     unsigned char CRCLo = 0xFF ; /* low byte of CRC16 initialized */
     for(int i = start; i < fin; i++){
-        Index = CRCHi ^ *src++ ; /* calculate the CRC16 */
+        Index = CRCHi ^ src[i] ; /* calculate the CRC16 */
         CRCHi = CRCLo ^ CRC16Hi[Index] ;
         CRCLo = CRC16Lo[Index] ;
     }

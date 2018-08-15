@@ -104,9 +104,11 @@ FF 01 00 32 D5 A1 AF FF 00 01 40 40 AF
 ```
 FF 01 01 24 8B 21 AF FF 00 01 40 40 AF
 ```
-* Get mode: 
+* Get mode/motor/servo: 
 ```
 FF 10 FF 00 AF
+FF 11 FF 00 AF
+FF 12 FF 00 AF
 ```
 
 ### Contact me

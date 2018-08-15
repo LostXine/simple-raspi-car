@@ -7,7 +7,7 @@ Compile:
 2.compile and upload
 */
 
-//#define PRINT_ASCII       //reply ACSII chars when defined
+#define PRINT_ASCII       //reply ACSII chars when defined
 #define CRC16            // using CRC16(Modbus) rather than XOR
 
 /* --- CONFIG ---*/
