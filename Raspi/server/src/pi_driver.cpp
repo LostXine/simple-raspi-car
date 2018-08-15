@@ -159,12 +159,10 @@ void pi_driver::set_mode(char v){
 }
 
 void pi_driver::set_motor(int v){
-    LOG(INFO)<<"motor"<<int(v);
     set_cmd(0x01, v);
 }   
 
 void pi_driver::set_servo(int v){
-    LOG(INFO)<<"servo"<<int(v);
     set_cmd(0x02, v);
 }
 
