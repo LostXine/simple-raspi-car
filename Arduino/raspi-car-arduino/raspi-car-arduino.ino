@@ -175,8 +175,7 @@ void reset_all(){
 
 // check raspi enable GPIO
 bool check_enable(){
-  bool enable = analogRead(RPI_ENABLE) > 600;
-  //bool enable = true;
+  bool enable = digitalRead(RPI_ENABLE);
   digitalWrite(LED_BUILTIN, enable);
   return enable;
 }
