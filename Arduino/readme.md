@@ -9,9 +9,9 @@
 
 ### Hardware
 ```
-PIN 4  <- Raspberry PI: Enable</br>
-PIN 9  -> Steering Servo</br>
-PIN 10 -> ESC
+PIN D4  <- Raspberry PI: Enable GPIO_GEN1</br>
+PIN D9  -> Steering Servo</br>
+PIN D10 -> ESC
 ```
 
 ### Serial Protocal
@@ -102,7 +102,7 @@ FF 01 00 32 D5 A1 AF FF 00 01 C0 70 AF
 ```
 * Backward 0.3: 
 ```
-FF 01 01 24 8B 21 AF FF 00 01 C0 70 AF
+FF 01 01 24 21 8B AF FF 00 01 C0 70 AF
 ```
 * Get mode/motor/servo: 
 ```

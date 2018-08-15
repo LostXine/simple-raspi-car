@@ -4,9 +4,9 @@
 
 ####  Compile and run raspicar-server
 
-Depends: glog, rapidjson(included as submodule)
+Depends: glog, wiringPi, rapidjson(included as submodule)
 
-1. install glog
+1. install glog and wiringPi
 2. clone rapidjson
 ```
 git submodule init
