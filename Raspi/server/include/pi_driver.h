@@ -9,8 +9,8 @@ Contact: lostxine@gmail.com
 
 #include "pi_serial.h"
 
-#define START_FLAG 0xff
-#define END_FLAG   0xaf
+#define START_FLAG 0xFF   // start flag
+#define END_FLAG   0xAF   // end flag
 
 typedef int (*SDCB)(char*, int);
 
@@ -21,31 +21,28 @@ class pi_driver{
         void set_port(pi_serial* ps);
 
         bool is_running(){return keepRunning && port->is_running();}
-        // var :    1 ---- 0 ---- -1
-        //motor: forward  stop  backward
-        //servo:  left    mid    right 
-        void set_motion(float motor, float servo);// two motion :motor and servo
+        // set
+        void set_mode(char v);
+        // var :    -1 ---- 0 ---- 1
+        //motor: backward  stop  forward
+        //servo:   left    mid   right
+        void set_motor(char v);
+        void set_servo(char v);
         void set_distance(unsigned char * dt);// set distance
         void set_distance_num(unsigned long long dt);// set distance
 
-        // option: bit 3 and bit 2
-        void launch_speed_mode(char option = 0);    // -> set_status
-        void launch_distance_mode(char option = 0); // -> set_status
-        void stop_any_mode(char option = 0);        // -> set_status
-        // bit |    3     2         1       0
-        //  0  |   N/A   N/A   speed mode  stop
-        //  1  |  reset reset  distance    run 
-        void set_status(char status);
-
-        //query status
-        void query_status();
-        void query_sensor();
-
+        // query
+        void query_mode();
+        void query_motor();
+        void query_servo();
+        
         //set udp_send_back
         void set_udp(void* _udp);
+        // parse json
+        int parse_json(char* js, int len);
 
-        unsigned int get_CRC16(char* src, int len);
-        void fill_CRC16(char* buf, int len);
+        unsigned int get_CRC16(unsigned char* src, int start, int fin);
+        void fill_CRC16(unsigned char* src, int start, int fin);
 
         friend void fetching_thread(pi_driver* pd);
 
@@ -56,8 +53,10 @@ class pi_driver{
         std::queue<int>tofetchlist; // int<0: need to parse else: do nothing
         std::mutex fetchmutex;
         std::thread* fetching;
-        void launch_msg(char* src, int len, int tofetch);
-        void transfer_response(char* src, int len);
+        void launch_msg(unsigned char* src, int len, int tofetch);
+        void transfer_response(unsigned char* src, int start, int fin);
+        void set_cmd(unsigned char code, char v);
+        unsigned int assemble_bytes(unsigned char a, unsigned char b);
         void* udp = nullptr;
         
 };

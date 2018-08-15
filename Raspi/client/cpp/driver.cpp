@@ -30,13 +30,13 @@ driver::~driver(){
 
 void driver::setMotor(float motor){
     motor = max(min(1.0f, motor), -1.0f);
-    sprintf(buf, "{\"sm\":%0.3f}", motor);
+    sprintf(buf, "{\"sm\":%d}", int(motor * 100));
     launch();
 }
 
 void driver::setServo(float servo){
     servo = max(min(1.0f, servo), -1.0f);
-    sprintf(buf, "{\"ss\":%0.3f}", servo);
+    sprintf(buf, "{\"ss\":%d}", int(servo * 100));
     launch();
 }
 
@@ -48,11 +48,26 @@ void driver::setDistance(unsigned long long int dist){
 void driver::setMotion(float motor, float servo){
     motor = max(min(1.0f, motor), -1.0f);
     servo = max(min(1.0f, servo), -1.0f);
-    sprintf(buf, "{\"sm\":%0.3f, \"ss\":%0.3f}",motor , servo);
+    sprintf(buf, "{\"sm\":%d, \"ss\":%d}",int(motor * 100), int(servo * 100));
     launch();
 }
 
-void driver::launchSpeedMode(){
+void driver::getMode(){
+    sprintf(buf, "{\"rq\":0}");
+    launch();
+}
+
+void driver::getMotor(){
+    sprintf(buf, "{\"rq\":1}");
+    launch();
+}
+
+void driver::getServo(){
+    sprintf(buf, "{\"rq\":2}");
+    launch();
+}
+
+void driver::launchVoltageMode(){
     sprintf(buf, "{\"so\":1}");
     launch();
 }
@@ -64,16 +79,6 @@ void driver::launchDistanceMode(){
 
 void driver::allStop(){
     sprintf(buf, "{\"so\":0}");
-    launch();
-}
-
-void driver::getStatus(){
-    sprintf(buf, "{\"ro\":0}");
-    launch();
-}
-
-void driver::getSensors(){
-    sprintf(buf, "{\"rs\":0}");
     launch();
 }
 

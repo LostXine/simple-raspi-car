@@ -46,29 +46,35 @@ class driver:
     
     def __setMotor(self, motor):
         # motor: from -1 to 1
-        self.__conf['sm'] = round(max(min(motor, 1), -1), 3)
+        self.__conf['sm'] = round(max(min(motor, 1), -1) * 100)
 
     def __setServo(self, steer):
         # steer: from -1 to 1
-        self.__conf['ss'] = round(max(min(steer, 1), -1), 3)
+        self.__conf['ss'] = round(max(min(steer, 1), -1) * 100)
 
     def __setDist(self, dt):
         # distance: from 0 to 0xffffffff
         self.__conf['sd'] = dt
 
     def __setMode(self, md):
-        if md == 'speed':
+        if md == 'voltage':
             self.__conf['so'] = 1
         if md == 'distance':
             self.__conf['so'] = 3
         if md == 'stop':
             self.__conf['so'] = 0
 
-    def __getMode(self):
-        self.__conf['ro'] = 0
+    def getMode(self):
+        self.__conf['rq'] = 0
+        self.__launch()
 
-    def __getSensor(self):
-        self.__conf['rs'] = 0
+    def getMotor(self):
+        self.__conf['rq'] = 1
+        self.__launch()
+
+    def getServo(self):
+        self.__conf['rq'] = 2
+        self.__launch()
 
     def setStatus(self, **dt):
         self.__conf['uid'] = round(time.time(), 5)
@@ -81,14 +87,6 @@ class driver:
         if 'mode' in dt:
             self.__setMode(dt['mode'])
         self.__launch()
-
-    def getStatus(self, **dt):
-        self.__conf['uid'] = round(time.time(), 5)
-        if 'mode' in dt:
-            self.__getMode()
-        if 'sensor' in dt:
-            self.__getSensor()
-            self.__launch()
 
     def close(self):
         self.__keepRunning = False

@@ -24,7 +24,7 @@ int main(){
     int t = 10;
     bool b = true;
     printf("Test 1/2: speed mode\n");
-    d->launchSpeedMode();
+    d->launchVoltageMode();
     while(kp1){
         float st = t * 0.1 - 1;
         float sm = st;
@@ -40,8 +40,9 @@ int main(){
         if (t > 20) {b = false; t-=2;}
         if (t < 0)  {b = true; t+=2;}
         sleep(1);
-        d->getStatus();
-        d->getSensors();
+        d->getMotor();
+        d->getServo();
+        d->getMode();
         sleep(1);
     };
     printf("Test 2/2: distance mode\n");
@@ -56,8 +57,9 @@ int main(){
         if (t > 20) {b = false; t-=2;}
         if (t < 0)  {b = true; t+=2;}
         sleep(1);
-        d->getStatus();
-        d->getSensors();
+        d->getMotor();
+        d->getServo();
+        d->getMode();
         sleep(1);
     };
     d->setMotion(0.0, 0.0);

@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include "rapidjson/pointer.h"
 
 #define UDP_PORT     61551
 #define RECV_BUF_LEN 256
@@ -56,77 +55,7 @@ int pi_udp::start_listen(int port){
     return 0;
 }
 
-int pi_udp::parse_json(char* js, int len){
-    rapidjson::Document d;
-    d.Parse(js);
-    if (d.HasParseError()) {return -1;}
-try{
-    //check uid
-    unsigned long long int tmp = 0;
-    if (rapidjson::Value* tmd = rapidjson::Pointer("/uid").Get(d)){
-    tmp = tmd->GetDouble();
-    }
-    if (tmp < uid){
-         LOG(WARNING)<<"Invalid timestamp: "<< js; 
-         return -2;
-    }else{
-        uid = tmp;
-    }
-    float set_motor = s_motor;
-    float set_servo = s_servo;
-    unsigned long long int set_dist = s_dist;
-    //check weither to send;
-    int to_send = 0;
-    rapidjson::Value* var;
-    //check speed
-    if (var = rapidjson::Pointer("/sm").Get(d)){
-        set_motor = var->GetDouble();
-        s_motor = set_motor;
-        to_send++;
-    }
 
-    //check servo
-    if (var = rapidjson::Pointer("/ss").Get(d)){
-        set_servo = var->GetDouble();
-        s_servo = set_servo;
-        to_send++;
-    }
-    //set speed and motion
-    if (to_send){
-        driver->set_motion(set_motor, set_servo);
-        to_send = 0;
-    }
-
-    //check distance
-    if (var = rapidjson::Pointer("/sd").Get(d)){
-        set_dist = var->GetUint64();
-        s_dist = set_dist;
-        driver->set_distance_num(set_dist);
-        to_send = 0;
-    }
-
-    //check mode
-    if (var = rapidjson::Pointer("/so").Get(d)){
-        int po = var->GetInt();
-        char option = 0x03 & po;
-        driver->set_status(option);
-    }
-
-    //check query requests
-    if (var = rapidjson::Pointer("/ro").Get(d)){
-        driver->query_status();
-    }
-    if (var = rapidjson::Pointer("/rs").Get(d)){
-        driver->query_sensor();
-    }
-    
-    return 0;
-}
-catch(exception &err){
-LOG(ERROR)<<err.what()<<endl;
-    return 1;
-}
-}
 
 int pi_udp::send(char* buf, int len){
     if (udps==-1){
@@ -167,7 +96,7 @@ void listening_thread(pi_udp* pu){
             //.sa_data: [0-1]: port [2-5]:ip
             //for (int i = 0; i < 14; i++){printf("%d.", int(pu->client_addr.sa_data[i]));}
             //printf("\n");
-            if (pu->parse_json(buf, recv_num)){
+            if (pu->pi_driver->parse_json(buf, recv_num)){
                 LOG(WARNING)<<"Parse error: " <<buf;
             }
         }

@@ -27,13 +27,7 @@ private:
     int udps; //udp socket
     int start_listen(int port);
     int finish_listen();
-    int parse_json(char* js, int len);
     std::thread* listening;
-
-    double uid;
-    float s_motor = 0.0f;
-    float s_servo = 0.0f;
-    unsigned long long int s_dist = 0x00;
 
     struct sockaddr client_addr;
     unsigned int client_len = 0;

@@ -34,7 +34,7 @@ def run_raspi_car():
             # 0 -> 0xffffffff
 
             # Mode control:
-            # 1:speed
+            # 1:voltage
             # 2:distance
             # 3:stop
 
@@ -43,8 +43,8 @@ def run_raspi_car():
             # mode = any
             # sensor = any
             try:
-                print("Test 1/2: speed mode")
-                d.setStatus(mode="speed")
+                print("Test 1/2: voltage mode")
+                d.setStatus(mode="voltage")
                 while True:
                     st = t * 0.1 -1
                     sm = st
@@ -66,7 +66,9 @@ def run_raspi_car():
                         t += 2
                     time.sleep(1)
                     # d.heartBeat()
-                    d.getStatus(sensor=0, mode=0)
+                    d.getMotor()
+                    d.getServo()
+                    d.getMode()
                     time.sleep(1)
             except KeyboardInterrupt:
                 d.setStatus(motor=0.0, servo=0.0, dist=0x00, mode="stop")
@@ -88,7 +90,9 @@ def run_raspi_car():
                         b = True
                         t += 2
                     time.sleep(1)
-                    d.getStatus(sensor=0, mode =0)
+                    d.getMotor()
+                    d.getServo()
+                    d.getMode()
                     time.sleep(1)
             except KeyboardInterrupt:
                 d.setStatus(motor=0.0, servo=0.0, dist=0x00, mode="stop")

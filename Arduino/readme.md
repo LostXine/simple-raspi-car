@@ -14,12 +14,21 @@ PIN 9  -> Steering Servo</br>
 PIN 10 -> ESC
 ```
 
-### Protocal
+### Serial Protocal
 * General
+
+For XOR:
 ```
 0xFF databytes XOR 0xAF
 |start byte    |   |end byte
                |XOR check byte from databytes
+```
+
+For CRC16(MODBUS)
+```
+0xFF databytes CRC16Hi CRC16Low 0xAF
+|start byte    |                |end byte
+               |CRC16 High and low bytes
 ```
 Tips: All commands should begin with '0xFF' and end at '0xAF'
 
@@ -45,7 +54,7 @@ Command type:
 
 * SET Mode
 ```
-0xFF 0x00 0x00 XOR 0xAF
+0xFF 0x00 0x00 XOR/CRC 0xAF
           |mode number
           |0x00 stop         : stop the motor
           |0x01 const voltage: give the motor constant voltage
@@ -54,7 +63,7 @@ Command type:
 
 * SET Motor(Voltage/Speed)
 ```
-0xFF 0x01 0x00 0x00 XOR 0xAF
+0xFF 0x01 0x00 0x00 XOR/CRC 0xAF
           |mode direction
           |0x00 forward
           |else backward
@@ -64,7 +73,7 @@ Command type:
 
 * SET Steering Servo
 ```
-0xFF 0x02 0x00 0x00 XOR 0xAF
+0xFF 0x02 0x00 0x00 XOR/CRC 0xAF
           |mode direction
           |0x00 left
           |else right
@@ -74,7 +83,7 @@ Command type:
 
 * GET current setting
 ```
-0xFF 0x1. XOR 0xAF
+0xFF 0x1. XOR/CRC 0xAF
      |get method
      |0x10 get mode
      |0x11 get motor
@@ -82,22 +91,22 @@ Command type:
 ```
 When Arduino receives 'GET', it will response 'SET' commands above.
 
-### Test cases
+### Test cases(CRC16)
 * All stop: 
 ```
-FF 00 00 00 AF
+FF 00 00 B0 01 AF
 ```
 * Forward 0.5:
 ```
-FF 01 00 32 33 AF FF 00 01 01 AF
+FF 01 00 32 D5 A1 AF FF 00 01 70 C0 AF
 ```
 * Backward 0.3: 
 ```
-FF 01 01 24 24 AF FF 00 01 01 AF
+FF 01 01 24 8B 21 AF FF 00 01 70 C0 AF
 ```
 * Get mode: 
 ```
-FF 10 10 AF
+FF 10 8C BE AF
 ```
 
 ### Contact me

@@ -41,13 +41,40 @@ sh ./compile.sh
 
 Edit clients to complete different tasks.
 
+### UDP Protocal
+
+* General
+
+UDP data is JSON in utf-8
+
+* Client -> Server
+
+| Key | Value | Note |
+| ---- | ---- | ---- |
+|sm|int: -100 ~ 100| set value related to motor|
+|ss|int: -100 ~ 100| set value related to servo|
+|so|int: 0~1 | set mode: 0x00 stop 0x01 const voltage|
+|rq|int: 0x00 ~ 0x0f| request value |
+
+* Server -> Client
+| Key | Value | Note |
+| ---- | ---- | ---- |
+|qm|int: -100 ~ 100| value related to motor|
+|qs|int: -100 ~ 100| value related to servo|
+|qo|int: 0~1 | mode: 0x00 stop 0x01 const voltage|
+
 ### Server
 
-* Structure
+* Info flow
 ```
 Serial port <-> Driver <-> UDP -> main_loop
 | recving thread  |         | listening thread
 | sending thread  | fetching thread
+```
+
+* Depends
+```
+Serial port <- Driver <- UDP
 ```
 
 ### Client

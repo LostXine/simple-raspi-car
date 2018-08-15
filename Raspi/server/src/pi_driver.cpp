@@ -7,6 +7,8 @@ Contact: lostxine@gmail.com
 #include "pi_udp.h"
 #include <algorithm>
 
+#include "rapidjson/pointer.h"
+
 /* CRC16 Table High byte */
 static unsigned char CRC16Hi[] = {
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
@@ -80,8 +82,6 @@ static char CRC16Lo[] = {
 } ;
 
 #define MAX_ERROR_COUNT 10
-#define MAX_MOTOR_VALUE 255
-#define MAX_SERVO_VALUE 200
 
 pi_driver::pi_driver(pi_serial* ps){
     LOG(INFO)<<"Driver online, id: "<<this; 
@@ -103,23 +103,23 @@ void pi_driver::set_port(pi_serial* ps){
     port = ps;
 }
 
-unsigned int pi_driver:: get_CRC16(char* src, int len){
-    unsigned Index ; /* will index into CRC16 lookup table */
+unsigned int pi_driver:: get_CRC16(unsigned char* src, int start, int fin){
+    unsigned int Index ; /* will index into CRC16 lookup table */
 
     unsigned char CRCHi = 0xFF ; /* high byte of CRC16 initialized */
     unsigned char CRCLo = 0xFF ; /* low byte of CRC16 initialized */
-    while (len--){
+    for(int i = start; i < fin; i++){
         Index = CRCHi ^ *src++ ; /* calculate the CRC16 */
         CRCHi = CRCLo ^ CRC16Hi[Index] ;
         CRCLo = CRC16Lo[Index] ;
     }
-    return ((unsigned)CRCHi << 8 | CRCLo) ;
+    return assemble_bytes(CRCHi, CRCLo) ;
 }
 
-void pi_driver::fill_CRC16(char* buf, int len){
-    unsigned int crc = get_CRC16(buf, len);
-    buf[len] = crc >> 8;
-    buf[len+1]= crc & 0xff;
+void pi_driver::fill_CRC16(unsigned char* src, int start, int fin){
+    unsigned int crc = get_CRC16(buf, start, fin);
+    buf[fin] = unsigned char(crc >> 8);
+    buf[fin + 1]= unsigned char(crc & 0xff);
 }
 
 void pi_driver::launch_msg(char* src, int len, int tofetch){
@@ -129,19 +129,43 @@ void pi_driver::launch_msg(char* src, int len, int tofetch){
     fetchmutex.unlock();
 }
 
-void pi_driver::set_motion(float motor, float servo){
-    motor = std::max(std::min(1.0f, motor), -1.0f);
-    servo = std::max(std::min(1.0f, servo), -1.0f);
-    motor *= MAX_MOTOR_VALUE;
-    servo *= MAX_SERVO_VALUE;
-    //0x01 | 0x10 | 0x00 0x01 | 0x00 0x02 | 0x04 | MOTOR MOTOR | SERVO SERVO | CRC16 CRC16
-    char buf[] = {0x01,0x10,0x00,0x01,0x00, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    buf[7] = (motor > 0)? 0x01:0x00;
-    buf[8] = char(abs(motor));
-    buf[9] = (servo > 0)? 0x01:0x00;
-    buf[10]= char(abs(servo));
-    fill_CRC16(buf, sizeof(buf) - 2);
-    launch_msg(buf, sizeof(buf), 8);
+void pi_driver::set_cmd(unsigned char code, char v = 0){
+    int len = 4;
+    int fetch_len = len;
+    char buf[] = {START_FLAG, code, END_FLAG, END_FLAG, END_FLAG, END_FLAG, END_FLAG};
+    // SET
+    switch(code & 0x0f){
+        case 0:
+            char value = std::max(std::min(0x01, v), 0x00);
+            len += 2; // add 2 bytes: code mode
+            buf[2] = value
+            break;
+        default:
+            len += 3; // add 3 bytes: code, direction, value
+            char value = std::max(std::min(100, v), -100);
+            buf[3] = char(abs(value) * 100);
+            buf[2] = (value > 0)? 0x00: 0x01;
+    };
+    fetch_len = len;
+    if (code >> 4){
+        // GET
+        len = 5;
+        buf[4] = END_FLAG;
+    }
+    fill_CRC16(buf, 1, len - 3);
+    launch_msg(buf, len, fetch_len);
+}
+
+void pi_driver::set_mode(char v){
+    set_cmd(0x00, v);
+}
+
+void pi_driver::set_motor(char v){
+    set_cmd(0x01, v);
+}   
+
+void pi_driver::set_servo(char v){
+    set_cmd(0x02, v);
 }
 
 void pi_driver::set_distance_num(unsigned long long dt){
@@ -162,61 +186,76 @@ void pi_driver::set_distance(unsigned char * dt){
     launch_msg(buf, sizeof(buf), 8);
 }
 
-void pi_driver::set_status(char status){
-    status &= 0x0f;
-    //0x01 | 0x0f | 0x00 0x10 | 0x00 0x04 | 0x01 | STATUS | CRC16 CRC16
-    char buf[] = {0x01, 0x0f, 0x00, 0x10, 0x00, 0x04, 0x01, status, 0x00, 0x00};
-    fill_CRC16(buf, sizeof(buf) - 2);
-    launch_msg(buf, sizeof(buf), 9);
+void pi_driver::query_mode(){
+    set_cmd(0x10);
 }
 
-void pi_driver::launch_speed_mode(char option){
-    set_status((option & 0x0c) + 1);
+void pi_driver::query_motor(){
+    set_cmd(0x11);
 }
 
-void pi_driver::launch_distance_mode(char option){
-    set_status((option & 0x0c) + 3);
+void pi_driver::query_servo(){
+    set_cmd(0x12);
 }
 
-void pi_driver::stop_any_mode(char option){
-    set_status(option & 0x0e);
-}
-
-void pi_driver::query_sensor(){
-    char buf[] = {0x01, 0x04, 0x00, 0x05, 0x00, 0x05, 0x20, 0x08};
-    launch_msg(buf, sizeof(buf), -15);
-}
-
-void pi_driver::query_status(){
-    char buf[] = {0x01, 0x02, 0x00, 0x10, 0x00, 0x04, 0x78, 0x0c};
-    launch_msg(buf, sizeof(buf), -6);
+int pi_driver::parse_json(char* js, int len){
+    rapidjson::Document d;
+    d.Parse(js);
+    if (d.HasParseError()) {return -1;}
+    try{
+        //check uid
+        unsigned long long int tmp = 0;
+        if (rapidjson::Value* tmd = rapidjson::Pointer("/uid").Get(d)){
+        tmp = tmd->GetDouble();
+        }
+        if (tmp < uid){
+             LOG(WARNING)<<"Invalid timestamp: "<< js; 
+             return -2;
+        }else{
+            uid = tmp;
+        }
+        //check weither to send;
+        int to_send = 0;
+        rapidjson::Value* var;
+        //check speed
+        if (var = rapidjson::Pointer("/sm").Get(d)){
+            set_motor(var->GetInt());
+        }
+        //check servo
+        if (var = rapidjson::Pointer("/ss").Get(d)){
+            set_servo(var->GetInt());
+        }
+        //check mode
+        if (var = rapidjson::Pointer("/so").Get(d)){
+            set_mode(var->GetInt());
+        }
+        //check query requests
+        if (var = rapidjson::Pointer("/rq").Get(d)){
+            set_cmd(var->GetInt() & 0x0f | 0x10);
+        }
+    } catch(exception &err){
+        LOG(WARNING)<<err.what()<<endl;
+        return 1;
+    }
+    return 0;
 }
 
 void pi_driver::transfer_response(char* src, int len){
-    if (len < 2){LOG(WARNING)<<"Invalid src len";}
-    char buf[256] = {0x00};
-    switch(src[1]){
-        // query mode
-        case 0x02:{
-            if (len < 4){LOG(WARNING)<<"Invalid src len for query mode";}
-            int p = int(src[3] & 0x0f);
-            sprintf(buf, "{\"qo\":%d}", p);
+    if (len < 4){
+        LOG(WARNING)<<"Invalid src len";
+        return;
+    }
+    char buf[128] = {0x00};
+    switch(src[1] & 0x0f){
+        case 0:
+            sprintf(buf, "{\"qo\": %d}", src[2]);
             break;
-        };
-        // query sensor
-        case 0x04:{
-            if (len < 13){LOG(WARNING)<<"Invalid src len for query sensor";}
-            float motor = float(src[4]) / MAX_MOTOR_VALUE * ((src[3])? -1:1);
-            float servo = float(src[6]) / MAX_SERVO_VALUE * ((src[5])? -1:1);
-            float voltage = (float(src[11]) * 256 + float(src[12])) / 255 * 10;
-            unsigned long long int dist = src[7];
-            dist = (dist << 8) + src[8]; 
-            dist = (dist << 8) + src[9]; 
-            dist = (dist << 8) + src[10];
-            sprintf(buf, "{\"qm\":%0.3f,\"qs\":%0.1f,\"qd\":%lu,\"qv\":%0.2f}", motor, servo, dist, voltage);
+        case 1:
+            sprintf(buf, "{\"qm\": %d}", src[3] * ((src[2])? -1: 1));
             break;
-        };
-        default:{return;}
+        case 2:
+            sprintf(buf, "{\"qs\": %d}", src[3] * ((src[2])? -1: 1));
+            break;
     };
     if (udp){
         pi_udp* tmp = (pi_udp*)udp;
@@ -231,7 +270,7 @@ void fetching_thread(pi_driver* pd){
     while(pd->is_running()){
         if (MAX_ERROR_COUNT <= pd->err_count){
             pd->keepRunning = false;
-            LOG(FATAL)<<"Driver fetching too much ("<< pd-> err_count <<") error.";
+            LOG(ERROR)<<"Driver fetching too much ("<< pd-> err_count <<") error.";
             break;
         }
         
@@ -265,16 +304,22 @@ void fetching_thread(pi_driver* pd){
                     log.stream()<<std::hex<<std::setw(2)<<std::setfill('0')<<int(buf[i])<<" ";
                 }
                 log.stream()<<"\033[0;0m";
-                unsigned crc = pd->get_CRC16(buf, tofetch - 2);
-                if (char(crc & 0xff) == buf[tofetch - 1] && char(crc >> 8) == buf[tofetch - 2]){
-                    if (toparse){
-                        pd->transfer_response(buf, tofetch);
+                if (buf[0] == START_FLAG && buf[tofetch - 1] == END_FLAG){
+                    unsigned crc = pd->get_CRC16(buf, 1, tofetch - 3);
+                    if (crc == assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])){
+                        if (toparse){
+                            pd->transfer_response(buf, tofetch);
+                        }
+                    }else{
+                        LOG(WARNING)<<"recv msg CRC check failed: "
+                            <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])<<" vs. "
+                            <<std::setw(4)<<std::setfill('0')<<crc;
+                        pd->err_count++;
                     }
-                }else{
-                    LOG(WARNING)<<"recv msg CRC check failed: "
-                        <<std::hex<<std::setw(2)<<std::setfill('0')<<int(buf[tofetch - 2])
-                        <<std::hex<<std::setw(2)<<std::setfill('0')<<int(buf[tofetch - 1])<<" vs. "
-                        <<std::setw(4)<<std::setfill('0')<<crc;
+                } else {
+                    LOG(WARNING)<<"recv msg HEAD/TAIL check failed: "
+                    <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(buf[0], buf[tofetch - 1])<<" vs. "
+                    <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(START_FLAG, END_FLAG);
                     pd->err_count++;
                 }
             }
@@ -283,6 +328,10 @@ void fetching_thread(pi_driver* pd){
         usleep(1000);
     }
     LOG(INFO)<<"\033[0;36mfetching thread offline\033[0;0m";
+}
+
+unsigned int pi_driver::assemble_bytes(unsigned char a, unsigned char b){
+    return ((unsigned int)a << 8 | b);
 }
 
 void pi_driver::set_udp(void* _udp){
