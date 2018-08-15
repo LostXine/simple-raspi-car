@@ -201,8 +201,8 @@ int pi_driver::parse_json(char* js, int len){
         if (var = rapidjson::Pointer("/rq").Get(d)){
             set_cmd(var->GetInt() & 0x0f | 0x10);
         }
-    } catch(exception &err){
-        LOG(WARNING)<<err.what()<<endl;
+    } catch(std::exception &err){
+        LOG(WARNING)<<err.what();
         return 1;
     }
     return 0;
@@ -274,20 +274,20 @@ void fetching_thread(pi_driver* pd){
                 log.stream()<<"\033[0;0m";
                 if (buf[0] == START_FLAG && buf[tofetch - 1] == END_FLAG){
                     unsigned crc = pd->get_CRC16(buf, 1, tofetch - 3);
-                    if (crc == assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])){
+                    if (crc == pd->assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])){
                         if (toparse){
                             pd->transfer_response(buf, tofetch);
                         }
                     }else{
                         LOG(WARNING)<<"recv msg CRC check failed: "
-                            <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])<<" vs. "
+                            <<std::hex<<std::setw(4)<<std::setfill('0')<<pd->assemble_bytes(buf[tofetch - 3], buf[tofetch - 2])<<" vs. "
                             <<std::setw(4)<<std::setfill('0')<<crc;
                         pd->err_count++;
                     }
                 } else {
                     LOG(WARNING)<<"recv msg HEAD/TAIL check failed: "
-                    <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(buf[0], buf[tofetch - 1])<<" vs. "
-                    <<std::hex<<std::setw(4)<<std::setfill('0')<<assemble_bytes(START_FLAG, END_FLAG);
+                    <<std::hex<<std::setw(4)<<std::setfill('0')<<pd->assemble_bytes(buf[0], buf[tofetch - 1])<<" vs. "
+                    <<std::hex<<std::setw(4)<<std::setfill('0')<<pd->assemble_bytes(START_FLAG, END_FLAG);
                     pd->err_count++;
                 }
             }
