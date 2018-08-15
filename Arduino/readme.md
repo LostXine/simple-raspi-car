@@ -68,7 +68,7 @@ Command type:
           |0x00 forward
           |else backward
                |abs value
-               |0x00-0x64 -> 0.00 - 1.00
+               |0x00-0x64 0 - 100
 ```
 
 * SET Steering Servo
@@ -78,7 +78,7 @@ Command type:
           |0x00 left
           |else right
                |abs value
-               |0x00-0x64 -> 0.00 - 1.00
+               |0x00-0x64 0 - 100
 ```
 
 * GET current setting
