@@ -10,8 +10,11 @@ Contact: lostxine@gmail.com
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <wiringPi.h>
 
 using namespace std;
+
+#define RASPI_ENABLE 1
 
 static volatile bool keepRunning = true;
 
@@ -39,7 +42,10 @@ int main(int argc, char** argv)
     FLAGS_colorlogtostderr = true;
     FLAGS_logbufsecs = 0;
     FLAGS_max_log_size = 10; //max log size: 10mb
-    //glog done
+    //glog donei
+    //wiringpi
+    wiringPiSetup();
+    pinMode(RASPI_ENABLE, OUTPUT);
     //Start main loop
     LOG(INFO)<<"\033[1m\033[37mRaspiCar Server online\033[0m"<<endl;
     LOG(INFO)<<"Build time: "<< __TIME__<<" "<<__DATE__<<endl;
@@ -60,10 +66,12 @@ int main(int argc, char** argv)
             pd->set_mode(0);
             pd->set_servo(0);
             pd->set_motor(0);
+            digitalWrite(RASPI_ENABLE, HIGH);
             LOG(INFO)<<"main loop start\033[0m";
             while (keepRunning && pu->is_running()){
                 sleep(1);
             }
+            digitalWrite(RASPI_ENABLE, LOW);
             delete pu;
             delete pd;
             sleep(1);
