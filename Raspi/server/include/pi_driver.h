@@ -50,7 +50,7 @@ class pi_driver{
         std::mutex fetchmutex;
         std::thread* fetching;
         void launch_msg(unsigned char* src, int len, int tofetch);
-        void transfer_response(unsigned char* src, int start, int fin);
+        void transfer_response(unsigned char* src, int fin);
         void set_cmd(unsigned char code, char v);
         unsigned int assemble_bytes(unsigned char a, unsigned char b);
         void* udp = nullptr;

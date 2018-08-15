@@ -118,8 +118,8 @@ unsigned int pi_driver:: get_CRC16(unsigned char* src, int start, int fin){
 
 void pi_driver::fill_CRC16(unsigned char* src, int start, int fin){
     unsigned int crc = get_CRC16(src, start, fin);
-    src[fin] = unsigned char(crc >> 8);
-    src[fin + 1]= unsigned char(crc & 0xff);
+    src[fin] = crc >> 8;
+    src[fin + 1]= crc & 0xff;
 }
 
 void pi_driver::launch_msg(unsigned char* src, int len, int tofetch){
@@ -136,9 +136,8 @@ void pi_driver::set_cmd(unsigned char code, char v = 0){
     // SET
     switch(code & 0x0f){
         case 0:
-            char value = std::max(std::min(0x01, int(v)), 0x00);
             len += 2; // add 2 bytes: code mode
-            buf[2] = value
+            buf[2] = std::max(std::min(0x01, int(v)), 0x00);
             break;
         default:
             len += 3; // add 3 bytes: code, direction, value
@@ -185,19 +184,6 @@ int pi_driver::parse_json(char* js, int len){
     d.Parse(js);
     if (d.HasParseError()) {return -1;}
     try{
-        //check uid
-        unsigned long long int tmp = 0;
-        if (rapidjson::Value* tmd = rapidjson::Pointer("/uid").Get(d)){
-        tmp = tmd->GetDouble();
-        }
-        if (tmp < uid){
-             LOG(WARNING)<<"Invalid timestamp: "<< js; 
-             return -2;
-        }else{
-            uid = tmp;
-        }
-        //check weither to send;
-        int to_send = 0;
         rapidjson::Value* var;
         //check speed
         if (var = rapidjson::Pointer("/sm").Get(d)){
