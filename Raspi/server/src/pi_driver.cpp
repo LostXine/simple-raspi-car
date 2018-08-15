@@ -7,7 +7,7 @@ Contact: lostxine@gmail.com
 #include "pi_udp.h"
 #include <algorithm>
 
-#include "rapidjson/pointer.h"
+#include "rapidjson/include/rapidjson/pointer.h"
 
 /* CRC16 Table High byte */
 static unsigned char CRC16Hi[] = {
