@@ -117,12 +117,12 @@ unsigned int pi_driver:: get_CRC16(unsigned char* src, int start, int fin){
 }
 
 void pi_driver::fill_CRC16(unsigned char* src, int start, int fin){
-    unsigned int crc = get_CRC16(buf, start, fin);
-    buf[fin] = unsigned char(crc >> 8);
-    buf[fin + 1]= unsigned char(crc & 0xff);
+    unsigned int crc = get_CRC16(src, start, fin);
+    src[fin] = unsigned char(crc >> 8);
+    src[fin + 1]= unsigned char(crc & 0xff);
 }
 
-void pi_driver::launch_msg(char* src, int len, int tofetch){
+void pi_driver::launch_msg(unsigned char* src, int len, int tofetch){
     fetchmutex.lock();
     port->upload(src, len);
     tofetchlist.push(tofetch);
@@ -132,17 +132,17 @@ void pi_driver::launch_msg(char* src, int len, int tofetch){
 void pi_driver::set_cmd(unsigned char code, char v = 0){
     int len = 4;
     int fetch_len = len;
-    char buf[] = {START_FLAG, code, END_FLAG, END_FLAG, END_FLAG, END_FLAG, END_FLAG};
+    unsigned char buf[] = {START_FLAG, code, END_FLAG, END_FLAG, END_FLAG, END_FLAG, END_FLAG};
     // SET
     switch(code & 0x0f){
         case 0:
-            char value = std::max(std::min(0x01, v), 0x00);
+            char value = std::max(std::min(0x01, int(v)), 0x00);
             len += 2; // add 2 bytes: code mode
             buf[2] = value
             break;
         default:
             len += 3; // add 3 bytes: code, direction, value
-            char value = std::max(std::min(100, v), -100);
+            char value = std::max(std::min(100, int(v)), -100);
             buf[3] = char(abs(value) * 100);
             buf[2] = (value > 0)? 0x00: 0x01;
     };
@@ -177,13 +177,7 @@ void pi_driver::set_distance_num(unsigned long long dt){
 }
 
 void pi_driver::set_distance(unsigned char * dt){
-    //0x01 | 0x10 | 0x00 0x03 | 0x00 0x02 | 0x04 | DISTANCE * 4 | CRC16 CRC16
-    char buf[] = {0x01, 0x10, 0x00, 0x03, 0x00, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    for (int i = 0; i < 4; i++){
-        buf[7 + i] = dt[i];
-    }
-    fill_CRC16(buf, sizeof(buf) - 2);
-    launch_msg(buf, sizeof(buf), 8);
+    return;
 }
 
 void pi_driver::query_mode(){
@@ -240,7 +234,7 @@ int pi_driver::parse_json(char* js, int len){
     return 0;
 }
 
-void pi_driver::transfer_response(char* src, int len){
+void pi_driver::transfer_response(unsigned char* src, int len){
     if (len < 4){
         LOG(WARNING)<<"Invalid src len";
         return;
