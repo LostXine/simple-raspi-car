@@ -39,6 +39,7 @@ class pi_serial{
     private:
         int sfd;
         int err_count;
+        int thread_num;
         bool keepRunning;
         std::queue<unsigned char> recvpool;
         std::queue<unsigned char*> sendlist;

@@ -131,7 +131,6 @@ void pi_driver::launch_msg(unsigned char* src, int len, int tofetch){
 
 void pi_driver::set_cmd(unsigned char code, char v = 0){
     int len = 4;
-    int fetch_len = len;
     unsigned char buf[] = {START_FLAG, code, END_FLAG, END_FLAG, END_FLAG, END_FLAG, END_FLAG};
     // SET
     switch(code & 0x0f){
@@ -145,7 +144,7 @@ void pi_driver::set_cmd(unsigned char code, char v = 0){
             buf[3] = char(abs(value) * 100);
             buf[2] = (value > 0)? 0x00: 0x01;
     };
-    fetch_len = len;
+    int fetch_len = len;
     if (code >> 4){
         // GET
         len = 5;

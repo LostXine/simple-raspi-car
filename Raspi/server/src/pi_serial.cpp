@@ -19,11 +19,12 @@ Contact: lostxine@gmail.com
 pi_serial::pi_serial(char* port){
     LOG(INFO)<<"Serial port online, id:"<<this<<"\033[0m"; 
     keepRunning = false;
+    thread_num = 0;
     if(open_port(port)==0){
         err_count = 0;
         recving = new std::thread(recving_thread, this);
         sending = new std::thread(sending_thread, this);
-        while(!keepRunning){usleep(1000);}
+        while(thread_num < 2){usleep(1000);}
     } else {
         recving = nullptr;
         sending = nullptr;
@@ -127,6 +128,8 @@ int pi_serial::send(unsigned char* buf, int size){
 
 void sending_thread(pi_serial* ps){
     LOG(INFO)<<"\033[0;32msending thread online\033[0;0m";
+    ps->keepRunning = true;
+    ps->thread_num++;
     while(ps->is_running()){
         if (MAX_ERROR_COUNT <= ps->err_count){
             ps->keepRunning = false;
@@ -158,6 +161,7 @@ void sending_thread(pi_serial* ps){
         delete [] tmp;
         ps->sendlist.pop();
     }
+    ps->keepRunning = false;
     LOG(INFO)<<"\033[0;32msending thread offline\033[0;0m";
 }
 
@@ -165,6 +169,7 @@ void recving_thread(pi_serial* ps){
     LOG(INFO)<<"\033[0;33mrecving thread online\033[0;0m";
     unsigned char buf[32];
     ps->keepRunning = true;
+    ps->thread_num++;
     while(ps->is_running()){
         int bytes;
         ioctl(ps->sfd, FIONREAD, &bytes);
@@ -182,6 +187,7 @@ void recving_thread(pi_serial* ps){
         }
         usleep(1000);
     }
+    ps->keepRunning = false;
     LOG(INFO)<<"\033[0;33mrecving thread offline\033[0;0m";
 }
 
