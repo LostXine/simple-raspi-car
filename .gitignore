@@ -1,0 +1,3 @@
+*.pyc
+Raspi/client/python3/.idea/*
+Raspi/server/build/*

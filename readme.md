@@ -37,8 +37,8 @@ project
     |--Raspi   -> PI program
         |--server -> C++11 server on Pi to communacate with Arduino
         |--client
-            |--cpp    -> client demo in C++11
-            |--python -> client demo in python
+            |--cpp     -> client demo in C++11
+            |--python3 -> client demo in Python3
 ```
 
 ### Contact me
