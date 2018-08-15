@@ -94,21 +94,21 @@ When Arduino receives 'GET', it will response 'SET' commands above.
 ### Test cases(CRC16)
 * All stop: 
 ```
-FF 00 00 40 40 AF
+FF 00 00 01 B0 AF
 ```
-* Forward 0.5:
+* Forward 0.4:
 ```
-FF 01 00 32 D5 A1 AF FF 00 01 40 40 AF
+FF 01 00 32 D5 A1 AF FF 00 01 C0 70 AF
 ```
 * Backward 0.3: 
 ```
-FF 01 01 24 8B 21 AF FF 00 01 40 40 AF
+FF 01 01 24 8B 21 AF FF 00 01 C0 70 AF
 ```
 * Get mode/motor/servo: 
 ```
-FF 10 FF 00 AF
-FF 11 FF 00 AF
-FF 12 FF 00 AF
+FF 10 BE 8C AF
+FF 11 7F 4C AF
+FF 12 3F 4D AF
 ```
 
 ### Contact me

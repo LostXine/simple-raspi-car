@@ -7,7 +7,7 @@ Compile:
 2.compile and upload
 */
 
-#define PRINT_ASCII       //reply ACSII chars when defined
+//#define PRINT_ASCII       //reply ACSII chars when defined
 #define CRC16            // using CRC16(Modbus) rather than XOR
 
 /* --- CONFIG ---*/
@@ -253,16 +253,13 @@ void parse_read(int len){
   // XOR check
   if (
     #ifdef CRC16
-    get_crc16(t, 0, len - 1) == assemble_bytes(t[len - 2], t[len - 1])
+    get_crc16(t, 0, len - 2) == assemble_bytes(t[len - 2], t[len - 1])
     #else
     get_xor(t, 0, len - 1) == t[len - 1]
     #endif
     ){
     i_watch_dog = 0; // feed the dog
     int end_idx = 2; // Start FLAG + XOR byte
-    #ifdef CRC16
-    end_idx++;  // Add another CRC byte
-    #endif
     switch(t[0] & 0x0f){
       case 0x00: // mode
           end_idx += 1; //mode take 2 bytes

@@ -141,7 +141,7 @@ void pi_driver::set_cmd(unsigned char code, char v = 0){
         default:
             len += 3; // add 3 bytes: code, direction, value
             char value = std::max(std::min(100, int(v)), -100);
-            buf[3] = char(abs(value) * 100);
+            buf[3] = abs(value);
             buf[2] = (value > 0)? 0x00: 0x01;
     };
     int fetch_len = len;
