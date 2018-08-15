@@ -23,7 +23,7 @@ int main(){
     d->allStop();
     int t = 10;
     bool b = true;
-    printf("Test 1/2: speed mode\n");
+    printf("Test 1/2: voltage mode\n");
     d->launchVoltageMode();
     while(kp1){
         float st = t * 0.1 - 1;

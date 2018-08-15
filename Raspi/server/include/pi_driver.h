@@ -12,8 +12,6 @@ Contact: lostxine@gmail.com
 #define START_FLAG 0xFF   // start flag
 #define END_FLAG   0xAF   // end flag
 
-typedef int (*SDCB)(char*, int);
-
 class pi_driver{
     public:
         pi_driver(pi_serial* ps);

@@ -96,7 +96,7 @@ void listening_thread(pi_udp* pu){
             //.sa_data: [0-1]: port [2-5]:ip
             //for (int i = 0; i < 14; i++){printf("%d.", int(pu->client_addr.sa_data[i]));}
             //printf("\n");
-            if (pu->pi_driver->parse_json(buf, recv_num)){
+            if (pu->driver->parse_json(buf, recv_num)){
                 LOG(WARNING)<<"Parse error: " <<buf;
             }
         }

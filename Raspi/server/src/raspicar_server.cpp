@@ -57,20 +57,12 @@ int main(int argc, char** argv)
             pd = new pi_driver(ps);
             pu = new pi_udp(pd);
             // init config
-            pd->set_motion(0.0f, 0.0f);
-            pd->set_distance_num(0x00);
-            //pd->set_motion(0.5f, 0.0f);
-            //pd->launch_distance_mode();
-            //pd->launch_speed_mode();
+            pd->set_mode(0);
+            pd->set_servo(0);
+            pd->set_motor(0);
             LOG(INFO)<<"main loop start\033[0m";
-            //int t = 0;
             while (keepRunning && pu->is_running()){
                 sleep(1);
-                //pd->query_status();
-                //pd->query_sensor();
-                //pd->set_motion(0.5 + t * 0.05, t * 0.2 - 1);
-                //t++;
-                //if(t > 10){t = 0;}
             }
             delete pu;
             delete pd;
