@@ -168,18 +168,6 @@ void pi_driver::set_servo(char v){
     set_cmd(0x02, v);
 }
 
-void pi_driver::set_distance_num(unsigned long long dt){
-    unsigned char buf[] = {0x00, 0x00, 0x00, 0x00};
-    for(int i = 0;i < 4; i++){
-        buf[3-i] = (dt >> (8 * i))& 0x0ff;
-    }
-    set_distance(buf);
-}
-
-void pi_driver::set_distance(unsigned char * dt){
-    return;
-}
-
 void pi_driver::query_mode(){
     set_cmd(0x10);
 }
@@ -260,7 +248,7 @@ void pi_driver::transfer_response(unsigned char* src, int len){
 void fetching_thread(pi_driver* pd){
     LOG(INFO)<<"\033[0;36mfetching thread online\033[0;0m";
     pd->keepRunning = true;
-    char buf[256] = {0x00};
+    unsigned char buf[256] = {0x00};
     while(pd->is_running()){
         if (MAX_ERROR_COUNT <= pd->err_count){
             pd->keepRunning = false;

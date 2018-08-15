@@ -30,8 +30,8 @@ class pi_serial{
         //check status of port
         bool is_running(){return keepRunning;}
 
-        int upload(char* buf, int size);
-        int fetch(char* buf, int size);
+        int upload(unsigned char* buf, int size);
+        int fetch(unsigned char* buf, int size);
 
         friend void sending_thread(pi_serial* ps);
         friend void recving_thread(pi_serial* ps);
@@ -40,14 +40,14 @@ class pi_serial{
         int sfd;
         int err_count;
         bool keepRunning;
-        std::queue<char> recvpool;
-        std::queue<char*> sendlist;
+        std::queue<unsigned char> recvpool;
+        std::queue<unsigned char*> sendlist;
         std::mutex recvmutex;
         std::mutex sendmutex;
         std::thread* sending;
         std::thread* recving;
         // send data to serial port
-        int send(char* buf, int size);
+        int send(unsigned char* buf, int size);
 };
 
 void sending_thread(pi_serial* ps);

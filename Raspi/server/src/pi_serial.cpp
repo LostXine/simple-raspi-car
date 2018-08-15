@@ -72,10 +72,10 @@ int pi_serial::close_port(){
     return -1;
 }
 
-int pi_serial::upload(char* buf, int size){
+int pi_serial::upload(unsigned char* buf, int size){
     try{
-        char* tmp = new char[size + 1];
-        tmp[0] = char(size);
+        unsigned char* tmp = new unsigned char[size + 1];
+        tmp[0] = size;
         memcpy(tmp+1, buf, size);
         sendmutex.lock();
         sendlist.push(tmp);
@@ -87,7 +87,7 @@ int pi_serial::upload(char* buf, int size){
     return 0;
 }
 
-int pi_serial::fetch(char* buf, int size){
+int pi_serial::fetch(unsigned char* buf, int size){
     try{
         recvmutex.lock();
         if(recvpool.size() < size){
@@ -111,7 +111,7 @@ int pi_serial::get_port(int& pt){
     return (sfd == -1)?-1:0;
 }
 
-int pi_serial::send(char* buf, int size){
+int pi_serial::send(unsigned char* buf, int size){
     if (sfd != -1){
         auto&& log = COMPACT_GOOGLE_LOG_INFO;
         log.stream()<<"\033[0;32mSend "<<size<<" bytes: ";
@@ -133,7 +133,7 @@ void sending_thread(pi_serial* ps){
             LOG(FATAL)<<"Serial get too much ("<< ps-> err_count <<") error.";
             break;
         }
-        char* tmp = nullptr;
+        unsigned char* tmp = nullptr;
         ps->sendmutex.lock();
         if(!ps->sendlist.empty()){
             tmp = ps->sendlist.front();
@@ -154,7 +154,7 @@ void sending_thread(pi_serial* ps){
     }
     // release memory
     while(!ps->sendlist.empty()){
-        char* tmp = ps->sendlist.front();
+        unsigned char* tmp = ps->sendlist.front();
         delete [] tmp;
         ps->sendlist.pop();
     }
@@ -163,7 +163,7 @@ void sending_thread(pi_serial* ps){
 
 void recving_thread(pi_serial* ps){
     LOG(INFO)<<"\033[0;33mrecving thread online\033[0;0m";
-    char buf[32];
+    unsigned char buf[32];
     ps->keepRunning = true;
     while(ps->is_running()){
         int bytes;

@@ -26,8 +26,6 @@ class pi_driver{
         //servo:   left    mid   right
         void set_motor(char v);
         void set_servo(char v);
-        void set_distance(unsigned char * dt);// set distance
-        void set_distance_num(unsigned long long dt);// set distance
 
         // query
         void query_mode();
