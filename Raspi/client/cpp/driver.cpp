@@ -28,21 +28,26 @@ driver::~driver(){
     printf("----Driver ID:%d End----\n", this);
 }
 
-void driver::setMotor(float motor){
-    motor = max(min(1.0f, motor), -1.0f);
-    sprintf(buf, "{\"sm\":%d}", int(motor * 100));
+void driver::set_code(char* code, float v){
+    int value = max(min(1.0f, v), -1.0f) * 100;
+    sprintf(buf, "{\"%s\":%d}", code, value);
     launch();
+}
+
+void driver::setMotor(float motor){
+    set_code("sm", motor);
 }
 
 void driver::setServo(float servo){
-    servo = max(min(1.0f, servo), -1.0f);
-    sprintf(buf, "{\"ss\":%d}", int(servo * 100));
-    launch();
+    set_code("ss", motor);
 }
 
-void driver::setDistance(unsigned long long int dist){
-    sprintf(buf, "{\"sd\":%ld}", dist);
-    launch();
+void driver::setCamPitch(float pitch){
+    set_code("scp", pitch);
+}
+
+void driver::setCamYaw(float yaw){
+    set_code("scy", yaw);
 }
 
 void driver::setMotion(float motor, float servo){
@@ -52,28 +57,33 @@ void driver::setMotion(float motor, float servo){
     launch();
 }
 
-void driver::getMode(){
-    sprintf(buf, "{\"rq\":0}");
+void drvier::query_code(int code){
+    sprintf(buf, "{\"rq\":%d}", code);
     launch();
+}
+
+void driver::getMode(){
+    query_code(0);
 }
 
 void driver::getMotor(){
-    sprintf(buf, "{\"rq\":1}");
-    launch();
+    query_code(1);
 }
 
 void driver::getServo(){
-    sprintf(buf, "{\"rq\":2}");
-    launch();
+    query_code(2);
+}
+
+void getCamPitch(){
+    query_code(3);
+}
+
+void getCamYaw(){
+    query_code(4);
 }
 
 void driver::launchVoltageMode(){
     sprintf(buf, "{\"so\":1}");
-    launch();
-}
-
-void driver::launchDistanceMode(){
-    sprintf(buf, "{\"so\":3}");
     launch();
 }
 

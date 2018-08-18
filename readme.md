@@ -11,12 +11,14 @@ A smart car project based on Raspberry PI.
 ```
 Battery -> ESC(Electronic Speed Controller) -(BEC: 5V)-> Arduino -> Raspberry PI
                                             -(BEC: 5V)-> Steering Servo
+                                            -(BEC: 5V)-> Camera Yaw/Pitch Servo
                                             -(Battery)-> Motor
 ```
 * Control flow
 ```
 Raspberry PI <-Serial-> Arduino -PWM-> ESC
                                 -PWM-> Steering Servo
+                                -PWM-> Camera Yaw/Pitch Servo
 ```
 * Current config
 
@@ -28,6 +30,7 @@ Raspberry PI <-Serial-> Arduino -PWM-> ESC
 |ESC|HobbyWing QuicRun WP 860 Dual Brushed|
 |Motor|Type 540|
 |Steering Servo|Futaba S3003|
+|Camera Yaw/Pitch Servo|Tower Pro SG90|
 
 ### Software
 ```

@@ -45,14 +45,11 @@ int main(){
         d->getMode();
         sleep(1);
     };
-    printf("Test 2/2: distance mode\n");
-    d->setMotor(0.5);
-    d->setDistance(0x1ff00);
-    d->launchDistanceMode();
     while(kp2){
-        float ss = t * 0.1 - 1;
-        d->setServo(ss);
-        printf("Servo: %0.2f\n", ss);
+        st = t * 0.1 - 1;
+        sm = st;
+        d->setMotion(sm, st);
+        printf("Motor: %0.2f, Servo: %0.2f\n", sm, st);
         if (b){t++;}else{t--;}
         if (t > 20) {b = false; t-=2;}
         if (t < 0)  {b = true; t+=2;}

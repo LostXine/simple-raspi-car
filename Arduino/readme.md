@@ -12,6 +12,8 @@
 PIN D4  <- Raspberry PI: Enable GPIO_GEN1</br>
 PIN D9  -> Steering Servo</br>
 PIN D10 -> ESC
+PIN D5  -> Camera Pitch Servo
+PIN D6  -> Camera Yaw Servo
 ```
 
 ### Serial Protocal
@@ -24,7 +26,7 @@ For XOR:
                |XOR check byte from databytes
 ```
 
-For CRC16(MODBUS)
+(DEFAULT) For CRC16(MODBUS)
 ```
 0xFF databytes CRC16Hi CRC16Low 0xAF
 |start byte    |                |end byte
@@ -51,6 +53,8 @@ Command type:
 |0x.0|Mode|
 |0x.1|Motor|
 |0x.2|Steering Servo|
+|0x.3|Camera Pitch Servo|
+|0x.4|Camera Yaw Servo|
 
 * SET Mode
 ```
@@ -81,6 +85,16 @@ Command type:
                |0x00-0x64 0 - 100
 ```
 
+* SET Camera Servo
+```
+0xFF 0x03/0x04 0x00 0x00 XOR/CRC 0xAF
+     |pitch    |mode direction
+          |yaw |0x00 left
+               |else right
+                    |abs value
+                    |0x00-0x64 0 - 100
+```
+
 * GET current setting
 ```
 0xFF 0x1. XOR/CRC 0xAF
@@ -88,6 +102,8 @@ Command type:
      |0x10 get mode
      |0x11 get motor
      |0x12 get steering servo
+     |0x13 get camera pitch servo
+     |0x14 get camera yaw servo
 ```
 When Arduino receives 'GET', it will response 'SET' commands above.
 

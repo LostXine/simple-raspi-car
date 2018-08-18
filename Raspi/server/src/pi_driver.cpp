@@ -166,6 +166,14 @@ void pi_driver::set_servo(int v){
     set_cmd(0x02, v);
 }
 
+void pi_driver::set_cam_p(int v){
+    set_cmd(0x03, v);
+}
+
+void pi_driver::set_cam_y(int v){
+    set_cmd(0x04, v);
+}
+
 void pi_driver::query_mode(){
     set_cmd(0x10);
 }
@@ -178,12 +186,24 @@ void pi_driver::query_servo(){
     set_cmd(0x12);
 }
 
+void pi_driver::query_cam_p(){
+    set_cmd(0x13);
+}
+
+void pi_driver::query_cam_y(){
+    set_cmd(0x14);
+}
+
 int pi_driver::parse_json(char* js, int len){
     rapidjson::Document d;
     d.Parse(js);
     if (d.HasParseError()) {return -1;}
     try{
         rapidjson::Value* var;
+        //check mode
+        if (var = rapidjson::Pointer("/so").Get(d)){
+            set_mode(var->GetInt());
+        }
         //check speed
         if (var = rapidjson::Pointer("/sm").Get(d)){
             set_motor(var->GetInt());
@@ -192,9 +212,13 @@ int pi_driver::parse_json(char* js, int len){
         if (var = rapidjson::Pointer("/ss").Get(d)){
             set_servo(var->GetInt());
         }
-        //check mode
-        if (var = rapidjson::Pointer("/so").Get(d)){
-            set_mode(var->GetInt());
+        //check camera pitch
+        if (var = rapidjson::Pointer("/scp").Get(d)){
+            set_cam_p(var->GetInt());
+        }
+        //check camera yaw
+        if (var = rapidjson::Pointer("/scy").Get(d)){
+            set_cam_y(var->GetInt());
         }
         //check query requests
         if (var = rapidjson::Pointer("/rq").Get(d)){

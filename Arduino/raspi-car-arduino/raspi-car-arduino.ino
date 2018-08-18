@@ -15,6 +15,8 @@ Compile:
 #define RPI_ENABLE 4      // raspi: enable
 #define ESC_SIGN   10     // esc pin
 #define STR_SIGN   9      // steering pin
+#define CAM_YAW    6      // camera yaw servo
+#define CAM_PITCH  5      // camera pitch servo
 #define START_FLAG 0xFF   // start flag
 #define END_FLAG   0xAF   // end flag
 #define BUF_LEN    16     // buffer length
@@ -36,6 +38,16 @@ Compile:
 #define SERVO_RGT 110     // steering servo right limit
 #define SERVO_LFT 70      // steering servo left limit
 
+// camera yaw servo limits
+#define CAM_YAW_MID 100      // steering servo mid
+#define CAM_YAW_RGT 110     // steering servo right limit
+#define CAM_YAW_LFT 70      // steering servo left limit
+
+// camera pitch servo limits
+#define CAM_PIT_MID 90      // steering servo mid
+#define CAM_PIT_RGT 110     // steering servo right limit
+#define CAM_PIT_LFT 70      // steering servo left limit
+
 /* --- No need to change ---*/
 // include headers
 #include <Servo.h>       // servo driver
@@ -44,11 +56,15 @@ Compile:
 // global objects
 Servo m_servo;           // steering servo object
 Servo m_motor;           // motor object
+Servo m_cam_yaw;         // camera yaw servo
+Servo m_cam_pitch;       // camera pitch servo
 Chrono c_timer;           // control timmer
 
 // global vars
 char c_set_motor = 0;  // motor voltage
 char c_set_servo = 0;  // steering servo value
+char c_set_cam_y = 0;  // camera yaw servo
+char c_set_cam_p = 0;  // camera pitch servo
 byte  b_set_mode = 0;     // mode 
 byte  bl_r_buff[BUF_LEN] = {0};// read buffer
 byte  bl_w_buff[BUF_LEN] = {0};// write buffer
@@ -157,6 +173,28 @@ void set_servo(char b) {
   m_servo.write(value);
 }
 
+void set_cam_yaw(char b) {
+  float s = b / 100.0f;
+  float value = CAM_YAW_MID;
+  if (s > 0) {
+    value += s * (CAM_YAW_MID - CAM_YAW_RGT);
+  } else {
+    value += s * (CAM_YAW_LFT - CAM_YAW_MID);
+  }
+  m_cam_yaw.write(value);
+}
+
+void set_cam_pitch(char b) {
+  float s = b / 100.0f;
+  float value = CAM_PIT_MID;
+  if (s > 0) {
+    value += s * (CAM_PIT_MID - CAM_PIT_RGT);
+  } else {
+    value += s * (CAM_PIT_LFT - CAM_PIT_MID);
+  }
+  m_cam_pitch.write(value);
+}
+
 // set mode
 void set_mode(byte m){
   b_set_mode = min(max(m, 0), 0x02);  
@@ -164,13 +202,19 @@ void set_mode(byte m){
 
 void emergency_stop(){
   set_mode(0);
-  set_motor_volt(0.0);
+  set_motor_volt(0);
+}
+
+void reset_camera(){
+  set_cam_yaw(0);
+  set_cam_pitch(0);
 }
 
 void reset_all(){
   set_mode(0);
-  set_motor_volt(0.0);
-  set_servo(0.0);
+  set_motor_volt(0);
+  set_servo(0);
+  reset_camera();
 }
 
 // check raspi enable GPIO
@@ -265,19 +309,31 @@ void parse_read(int len){
           end_idx += 1; //mode take 2 bytes
           if (t[0] < 0x10){b_set_mode = limit_range(t[1], MODE_MAX);} // set
           f[2] = b_set_mode;
-        break;
+          break;
       case 0x01: // motor
           end_idx += 2; // motor and servo take 3 bytes
           if (t[0] < 0x10){c_set_motor = parse_two_bytes(t[1], t[2]);} // set
           f[2] = c_set_motor > 0;
           f[3] = abs(c_set_motor);
-        break;
+          break;
       case 0x02: // servo
           end_idx += 2;
           if (t[0] < 0x10){c_set_servo = parse_two_bytes(t[1], t[2]);} // set
           f[2] = c_set_servo > 0;
           f[3] = abs(c_set_servo);
-        break;
+          break;
+      case 0x03: // cam pitch servo
+          end_idx += 2;
+          if (t[0] < 0x10){c_set_cam_p = parse_two_bytes(t[1], t[2]);} // set
+          f[2] = c_set_cam_p > 0;
+          f[3] = abs(c_set_cam_p);
+          break;
+      case 0x04: // cam yaw servo
+          end_idx += 2;
+          if (t[0] < 0x10){c_set_cam_y = parse_two_bytes(t[1], t[2]);} // set
+          f[2] = c_set_cam_y > 0;
+          f[3] = abs(c_set_cam_y);
+          break;
     }
     f[1] = 0x0f & t[0]; // fill get->set
     send_buff(end_idx);
@@ -306,6 +362,8 @@ void setup() {
   // setup pins
   m_motor.attach(ESC_SIGN);     // attach esc
   m_servo.attach(STR_SIGN);     // attach steering servo
+  //m_cam_yaw.attach(CAM_YAW);    // attach camera yaw servo
+  //m_cam_pitch.attach(CAM_PITCH);// attach camera pitch servo
   pinMode(RPI_ENABLE, INPUT);   // attach raspi GPIO
   pinMode(LED_BUILTIN, OUTPUT); // setup LED
   // reset all paras

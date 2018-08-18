@@ -37,16 +37,15 @@ class DriveConsole:
     def __init__(self, d):
         self._motor = 0
         self._servo = 0
+        self._cam_p = 0
+        self._cam_y = 0
         self._driver = d
-        self._acc = 0.02
 
-    def draw_status(self, img):
-        text = 'Motor: %0.2f Servo: %0.2f' % (self._motor, self._servo)
+    def _draw_status(self, img, text, text_idx, axis):
         text_size = 0.6
         text_font = cv2.FONT_HERSHEY_DUPLEX
         text_box = (260, 10)  # cv2.getTextSize(text, text_font, text_size, thickness=3)[0]
         text_broader = 8
-        text_idx = (20, img.shape[0] - text_box[0] - text_broader * 4)
         # draw broader
         cv2.rectangle(img, (text_idx[0] - text_broader, text_idx[1] - text_box[1] - text_broader),
                       (text_box[0] + text_idx[0] + text_broader, text_idx[1] + text_box[0] + text_broader),
@@ -61,14 +60,22 @@ class DriveConsole:
         cv2.rectangle(img, (graph_idx[0] + graph_size[1] // 2, graph_idx[1]),
                       (graph_idx[0] + graph_size[1] // 2 + 1, graph_size[1] + graph_idx[1]), (0, 0, 0))
         # draw point
-        circle_center = (graph_idx[0] + graph_size[0] // 2 + round(self._servo * graph_size[0] // 2),
-                         graph_idx[1] + graph_size[1] // 2 - round(self._motor * graph_size[1] // 2))
+        circle_center = (graph_idx[0] + graph_size[0] // 2 + round(axis[1] * graph_size[0] // 2),
+                         graph_idx[1] + graph_size[1] // 2 - round(axis[0] * graph_size[1] // 2))
         cv2.circle(img, circle_center, 5, (0, 0, 0), 4)
         cv2.circle(img, circle_center, 2, (100, 230, 55), 4)
         # draw text
         cv2.putText(img, text, text_idx, text_font, text_size, (50, 120, 25), thickness=2)
         cv2.putText(img, text, text_idx, text_font, text_size, (100, 230, 55), thickness=1)
         return img
+
+    def draw_control_ui(self, img):
+        return self._draw_status(img, 'Motor: %0.2f Servo: %0.2f' % (self._motor, self._servo),
+                                 (20, img.shape[0] - 300), (self._motor, self._servo))
+
+    def draw_camera_ui(self, img):
+        return self._draw_status(img, 'Pitch: %0.2f Yaw: %0.2f' % (self._cam_p, self._cam_y),
+                                 (img.shape[1] - 280, img.shape[0] - 300), (self._cam_p, self._cam_y))
 
     def forward(self):
         self._motor += 0.1
@@ -92,6 +99,22 @@ class DriveConsole:
             self._servo += 0.1
         self._servo = max(min(self._servo, 1), -1)
 
+    def cam_up(self):
+        self._cam_p += 0.1
+        self._cam_p = max(min(self._cam_p, 1), -1)
+
+    def cam_down(self):
+        self._cam_p -= 0.1
+        self._cam_p = max(min(self._cam_p, 1), -1)
+
+    def cam_left(self):
+        self._cam_y += 0.1
+        self._cam_y = max(min(self._cam_y, 1), -1)
+
+    def cam_right(self):
+        self._cam_y -= 0.1
+        self._cam_y = max(min(self._cam_y, 1), -1)
+
     def stop(self):
         self._motor = 0
 
@@ -109,8 +132,9 @@ def raspi_car_demo():
         cam = cv2.VideoCapture(-1)
         no_cam = get_no_cam_img()
         dc = DriveConsole(d)
-        key_dict = {key: func for key, func in zip('WSADCwsadc',
-                                                   [dc.forward, dc.backward, dc.left, dc.right, dc.stop] * 2)}
+        key_dict = {key: func for key, func in zip('WSADCIKLJwsadciklj',
+                                                   [dc.forward, dc.backward, dc.left, dc.right, dc.stop,
+                                                    dc.cam_up, dc.cam_down, dc.cam_left, dc.cam_right] * 2)}
         # calculate fps
         fps_list = deque(maxlen=20)
         fps_list.append(0.1)
@@ -123,7 +147,8 @@ def raspi_car_demo():
                     img = no_cam.copy()
                 fps = len(fps_list) / sum(fps_list)
                 img = put_text_left_top(img, fps)
-                img = dc.draw_status(img)
+                img = dc.draw_control_ui(img)
+                img = dc.draw_camera_ui(img)
                 cv2.imshow('raspberry pi car', img)
                 key = cv2.waitKey(30) & 0xff
                 if key in (13, 27, ord('q'), ord('Q')):

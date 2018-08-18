@@ -26,11 +26,15 @@ class pi_driver{
         //servo:   left    mid   right
         void set_motor(int v);
         void set_servo(int v);
+        void set_cam_p(int v);
+        void set_cam_y(int v);
 
         // query
         void query_mode();
         void query_motor();
         void query_servo();
+        void query_cam_p();
+        void query_cam_y();
         
         //set udp_send_back
         void set_udp(void* _udp);
