@@ -80,10 +80,12 @@ class DriveConsole:
     def forward(self):
         self._motor += 0.1
         self._motor = max(min(self._motor, 1), -1)
+        self._driver.setMotor(self._motor)
 
     def backward(self):
         self._motor -= 0.1
         self._motor = max(min(self._motor, 1), -1)
+        self._driver.setMotor(self._motor)
 
     def left(self):
         if self._servo > 0:
@@ -91,6 +93,7 @@ class DriveConsole:
         else:
             self._servo -= 0.1
         self._servo = max(min(self._servo, 1), -1)
+        self._driver.setServo(self._servo)
 
     def right(self):
         if self._servo < 0:
@@ -98,31 +101,27 @@ class DriveConsole:
         else:
             self._servo += 0.1
         self._servo = max(min(self._servo, 1), -1)
+        self._driver.setServo(self._servo)
 
     def cam_up(self):
         self._cam_p += 0.1
         self._cam_p = max(min(self._cam_p, 1), -1)
+        self._driver.setCamPitch(self._cam_p)
 
     def cam_down(self):
         self._cam_p -= 0.1
         self._cam_p = max(min(self._cam_p, 1), -1)
+        self._driver.setCamPitch(self._cam_p)
 
     def cam_left(self):
         self._cam_y += 0.1
         self._cam_y = max(min(self._cam_y, 1), -1)
+        self._driver.setCamYaw(self._cam_y)
 
     def cam_right(self):
         self._cam_y -= 0.1
         self._cam_y = max(min(self._cam_y, 1), -1)
-
-    def stop(self):
-        self._motor = 0
-
-    def no_press(self):
-        pass
-
-    def update(self):
-        self._driver.setStatus(motor=self._motor, servo=self._servo)
+        self._driver.setCamYaw(self._cam_y)
 
 
 def raspi_car_demo():
@@ -132,8 +131,8 @@ def raspi_car_demo():
         cam = cv2.VideoCapture(-1)
         no_cam = get_no_cam_img()
         dc = DriveConsole(d)
-        key_dict = {key: func for key, func in zip('WSADCIKLJwsadciklj',
-                                                   [dc.forward, dc.backward, dc.left, dc.right, dc.stop,
+        key_dict = {key: func for key, func in zip('WSADIKLJwsadiklj',
+                                                   [dc.forward, dc.backward, dc.left, dc.right,
                                                     dc.cam_up, dc.cam_down, dc.cam_left, dc.cam_right] * 2)}
         # calculate fps
         fps_list = deque(maxlen=20)
@@ -150,12 +149,11 @@ def raspi_car_demo():
                 img = dc.draw_control_ui(img)
                 img = dc.draw_camera_ui(img)
                 cv2.imshow('raspberry pi car', img)
-                key = cv2.waitKey(30) & 0xff
+                key = cv2.waitKey(100) & 0xff
                 if key in (13, 27, ord('q'), ord('Q')):
                     break
                 if chr(key) in key_dict:
                     key_dict[chr(key)]()
-                    dc.update()
                 fps_list.append(time.clock() - fps_start)
         except KeyboardInterrupt:
             pass
