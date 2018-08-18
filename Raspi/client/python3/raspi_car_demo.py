@@ -155,9 +155,7 @@ def raspi_car_demo():
                     break
                 if chr(key) in key_dict:
                     key_dict[chr(key)]()
-                else:
-                    dc.no_press()
-                dc.update()
+                    dc.update()
                 fps_list.append(time.clock() - fps_start)
         except KeyboardInterrupt:
             pass
