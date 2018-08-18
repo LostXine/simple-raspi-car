@@ -42,25 +42,23 @@ int main(){
         sleep(1);
         d->getMotor();
         d->getServo();
-        d->getMode();
         sleep(1);
     };
+    printf("Test 2/2: camera move\n");
     while(kp2){
-        st = t * 0.1 - 1;
-        sm = st;
+        float st = t * 0.1 - 1;
+        float sm = st;
         d->setMotion(sm, st);
-        printf("Motor: %0.2f, Servo: %0.2f\n", sm, st);
+        printf("Pitch: %0.2f, Yaw: %0.2f\n", sm, st);
         if (b){t++;}else{t--;}
         if (t > 20) {b = false; t-=2;}
         if (t < 0)  {b = true; t+=2;}
         sleep(1);
-        d->getMotor();
-        d->getServo();
-        d->getMode();
+        d->getCamPitch();
+        d->getCamYaw();
         sleep(1);
     };
     d->setMotion(0.0, 0.0);
-    d->setDistance(0x00);
     d->allStop();
     delete d;
     return 0;

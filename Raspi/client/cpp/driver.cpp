@@ -28,7 +28,7 @@ driver::~driver(){
     printf("----Driver ID:%d End----\n", this);
 }
 
-void driver::set_code(char* code, float v){
+void driver::set_code(const char* code, float v){
     int value = max(min(1.0f, v), -1.0f) * 100;
     sprintf(buf, "{\"%s\":%d}", code, value);
     launch();
@@ -39,7 +39,7 @@ void driver::setMotor(float motor){
 }
 
 void driver::setServo(float servo){
-    set_code("ss", motor);
+    set_code("ss", servo);
 }
 
 void driver::setCamPitch(float pitch){
@@ -57,7 +57,7 @@ void driver::setMotion(float motor, float servo){
     launch();
 }
 
-void drvier::query_code(int code){
+void driver::query_code(int code){
     sprintf(buf, "{\"rq\":%d}", code);
     launch();
 }
@@ -74,11 +74,11 @@ void driver::getServo(){
     query_code(2);
 }
 
-void getCamPitch(){
+void driver::getCamPitch(){
     query_code(3);
 }
 
-void getCamYaw(){
+void driver::getCamYaw(){
     query_code(4);
 }
 

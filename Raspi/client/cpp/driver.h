@@ -28,7 +28,7 @@ class driver{
         int sock;
         struct sockaddr_in serv_addr;
         int launch();
-        void set_code(char* code, float v);
+        void set_code(const char* code, float v);
         void query_code(int code);
         char buf[256];
         bool keepRunning;

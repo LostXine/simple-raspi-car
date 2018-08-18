@@ -41,10 +41,9 @@ class driver:
 
     def __del__(self):
         self.__sock.close()
-        print(dash_print('Driver No.%d Deleted' % id(self)))
+        print(dash_print('Driver No.%d End') % id(self))
 
     def open(self):
-        print(dash_print('Driver No.%d Open' % id(self)))
         try:
             self.__keepRunning = True
             self.__recv_t.start()
@@ -57,7 +56,6 @@ class driver:
     def close(self):
         self.__keepRunning = False
         self.__recv_t.join()
-        print(dash_print('Driver No.%d Closed' % id(self)))
 
     def __launch(self):
         self.__sock.sendto(json.dumps(self.__conf).encode('utf-8'), self.__dst)
