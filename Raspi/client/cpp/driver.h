@@ -12,13 +12,15 @@ class driver{
         void setMotor(float motor);
         void setServo(float servo);
         void setMotion(float motor, float servo);
-        void setDistance(unsigned long long int dist);
+        void setCamPitch(float pitch);
+        void setCamYaw(float yaw);
         void launchVoltageMode();
-        void launchDistanceMode();
         void allStop();
         void getMode();
         void getMotor();
         void getServo();
+        void getCamPitch();
+        void getCamYaw();
         
     friend void recv_threading(driver* d);
 
@@ -26,6 +28,8 @@ class driver{
         int sock;
         struct sockaddr_in serv_addr;
         int launch();
+        void set_code(const char* code, float v);
+        void query_code(int code);
         char buf[256];
         bool keepRunning;
         std::thread recv_thread;

@@ -12,41 +12,19 @@ import time
 
 def run_raspi_car():
     print("==========Client Start==========")
+    # if True:
+    #    d = driver()
+    #    d.open()
     with driver() as d:
         if d is not None:
-            d.setStatus(motor=0.0, servo=0.0, dist=0x00, mode="stop")
+            d.setStatus(motor=0.0, servo=0.0, dist=0x00, cam_pitch=0, cam_yaw=0, mode="stop")
             t = 10
             b = True
-
-            # d.setStatus(...)
-            # Motor control:
-            # motor = ...
-            # forward  0 -> 1.0
-            # backward 0 -> -1.0
-
-            # Servo control:
-            # servo = ...
-            # left = mid = right
-            # 1.0  = 0.0 =  -1.0
-
-            # Distance:
-            # dist = ...
-            # 0 -> 0xffffffff
-
-            # Mode control:
-            # 1:voltage
-            # 2:distance
-            # 3:stop
-
-            # d.getStatus(...)
-            # query mode:
-            # mode = any
-            # sensor = any
             try:
                 print("Test 1/2: voltage mode")
                 d.setStatus(mode="voltage")
                 while True:
-                    st = t * 0.1 -1
+                    st = t * 0.1 - 1
                     sm = st
                     if abs(st) < 0.4:
                         sm = 0.4 if st > 0 else -0.4
@@ -73,12 +51,13 @@ def run_raspi_car():
             except KeyboardInterrupt:
                 d.setStatus(motor=0.0, servo=0.0, dist=0x00, mode="stop")
             try:
-                print("Test 2/2: distance mode")
-                d.setStatus(motor=0.5, dist=0x1ff00, mode="distance")
+                print("Test 2/2: camera move")
+                d.setStatus(motor=0.0, servo=0, mode="voltage")
                 while True:
-                    ss = t * 0.1 - 1
-                    d.setStatus(servo=ss)
-                    print("Servo: %0.2f" % ss)
+                    st = t * 0.1 - 1
+                    sm = st
+                    d.setStatus(cam_pitch=sm, cam_yaw=st)
+                    print("Pitch: %0.2f, Yaw: %0.2f" % (sm, st))
                     if b:
                         t += 1
                     else:
@@ -90,12 +69,13 @@ def run_raspi_car():
                         b = True
                         t += 2
                     time.sleep(1)
-                    d.getMotor()
-                    d.getServo()
-                    d.getMode()
+                    # d.heartBeat()
+                    d.getCamPitch()
+                    d.getCamYaw()
                     time.sleep(1)
             except KeyboardInterrupt:
-                d.setStatus(motor=0.0, servo=0.0, dist=0x00, mode="stop")
+                d.setStatus(motor=0.0, servo=0.0, dist=0x00, cam_pitch=0, cam_yaw=0, mode="stop")
+            d.close()
     print("==========Client Fin==========")
     return 0
                

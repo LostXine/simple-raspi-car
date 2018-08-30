@@ -53,6 +53,8 @@ UDP data is JSON in utf-8
 | ---- | ---- | ---- |
 |sm|int: -100 ~ 100| set value related to motor|
 |ss|int: -100 ~ 100| set value related to servo|
+|scp|int: -100 ~ 100| set value related to camera pitch servo|
+|scy|int: -100 ~ 100| set value related to camera yaw servo|
 |so|int: 0~1 | set mode: 0x00 stop 0x01 const voltage|
 |rq|int: 0x00 ~ 0x0f| request value |
 
@@ -61,6 +63,8 @@ UDP data is JSON in utf-8
 | ---- | ---- | ---- |
 |qm|int: -100 ~ 100| value related to motor|
 |qs|int: -100 ~ 100| value related to servo|
+|qcp|int: -100 ~ 100| related to camera pitch servo|
+|qcy|int: -100 ~ 100| related to camera yaw servo|
 |qo|int: 0~1 | mode: 0x00 stop 0x01 const voltage|
 
 ### Server
