@@ -4,6 +4,7 @@ A smart car project based on Raspberry PI.
 
 
 ### What's up
+* v0.2: Add camera yaw/pitch servo.
 * v0.1: Establish the project.
 
 ### Hardware
@@ -37,6 +38,7 @@ Raspberry PI <-Serial-> Arduino -PWM-> ESC
 project
     |--readme.md
     |--Arduino -> Arduino program
+    |--Car -> Information of origin RC car
     |--Raspi   -> PI program
         |--server -> C++11 server on Pi to communacate with Arduino
         |--client

@@ -27,6 +27,7 @@ class driver:
         self.__sock.settimeout(1.0)
         self.__keepRunning = False
         self.__recv_t = threading.Thread(target=self.recv_thread)
+        self.__callback = None
         print(dash_print('Driver No.%d Init' % id(self)))
 
     def __enter__(self):
@@ -56,6 +57,9 @@ class driver:
     def close(self):
         self.__keepRunning = False
         self.__recv_t.join()
+
+    def setCallback(self, cmd):
+        self.__callback = cmd
 
     def __launch(self):
         self.__sock.sendto(json.dumps(self.__conf).encode('utf-8'), self.__dst)
@@ -125,6 +129,8 @@ class driver:
     def parse_feedback(self, js):
         try:
             obj = json.loads(js.decode('utf-8'))
+            if self.__callback:
+                self.__callback(obj)
             """
             if not 'uid' in obj:
                 print("Uid is needed")

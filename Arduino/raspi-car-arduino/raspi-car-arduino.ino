@@ -31,22 +31,22 @@ Compile:
 // motor limits
 #define MOTOR_MID 90      // motor voltage mid
 #define MOTOR_FWD 65      // motor voltage min
-#define MOTOR_BCK 105     // motor voltage max
+#define MOTOR_BCK 115     // motor voltage max
 
 // steering servo limits
 #define SERVO_MID 90      // steering servo mid
-#define SERVO_RGT 110     // steering servo right limit
-#define SERVO_LFT 70      // steering servo left limit
+#define SERVO_RGT 130     // steering servo right limit
+#define SERVO_LFT 50      // steering servo left limit
 
 // camera yaw servo limits
-#define CAM_YAW_MID 100      // steering servo mid
-#define CAM_YAW_RGT 110     // steering servo right limit
-#define CAM_YAW_LFT 70      // steering servo left limit
+#define CAM_YAW_MID 100     // yaw servo mid
+#define CAM_YAW_RGT 160     // yaw servo right limit
+#define CAM_YAW_LFT 40      // yaw servo left limit
 
 // camera pitch servo limits
-#define CAM_PIT_MID 90      // steering servo mid
-#define CAM_PIT_RGT 110     // steering servo right limit
-#define CAM_PIT_LFT 70      // steering servo left limit
+#define CAM_PIT_MID 90      // pitch servo mid
+#define CAM_PIT_RGT 140     // pitch servo right limit
+#define CAM_PIT_LFT 40      // pitch servo left limit
 
 /* --- No need to change ---*/
 // include headers
@@ -362,8 +362,8 @@ void setup() {
   // setup pins
   m_motor.attach(ESC_SIGN);     // attach esc
   m_servo.attach(STR_SIGN);     // attach steering servo
-  //m_cam_yaw.attach(CAM_YAW);    // attach camera yaw servo
-  //m_cam_pitch.attach(CAM_PITCH);// attach camera pitch servo
+  m_cam_yaw.attach(CAM_YAW);    // attach camera yaw servo
+  m_cam_pitch.attach(CAM_PITCH);// attach camera pitch servo
   pinMode(RPI_ENABLE, INPUT);   // attach raspi GPIO
   pinMode(LED_BUILTIN, OUTPUT); // setup LED
   // reset all paras
@@ -399,6 +399,8 @@ void loop() {
       }
       if (b_set_mode == 0x00){emergency_stop();} // stop mode
       else{set_servo(c_set_servo);}              // otherwise set servo
+      set_cam_yaw(c_set_cam_y);     // set camera yaw
+      set_cam_pitch(c_set_cam_p);     // set camera pitch
       switch(b_set_mode){
         case 0x01:
           // const volt mode

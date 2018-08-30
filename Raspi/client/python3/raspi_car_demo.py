@@ -39,7 +39,13 @@ class DriveConsole:
         self._servo = 0
         self._cam_p = 0
         self._cam_y = 0
+        self._volta = False
         self._driver = d
+        self._driver.setCallback = self.parse_callback
+
+    def parse_callback(self, obj):
+        for i in obj:
+            print(i)
 
     def _draw_status(self, img, text, text_idx, axis):
         text_size = 0.6
@@ -70,6 +76,8 @@ class DriveConsole:
         return img
 
     def draw_control_ui(self, img):
+        cv2.circle(img, (img.shape[1] - 20, 15), 12, (0, 0, 0), -1)
+        cv2.circle(img, (img.shape[1] - 20, 15), 9, (0, 255, 0) if self._volta else (0, 0, 255), -1)
         return self._draw_status(img, 'Motor: %0.2f Servo: %0.2f' % (self._motor, self._servo),
                                  (20, img.shape[0] - 300), (self._motor, self._servo))
 
@@ -85,6 +93,10 @@ class DriveConsole:
     def backward(self):
         self._motor -= 0.1
         self._motor = max(min(self._motor, 1), -1)
+        self._driver.setMotor(self._motor)
+
+    def carbreak(self):
+        self._motor = 0
         self._driver.setMotor(self._motor)
 
     def left(self):
@@ -123,6 +135,14 @@ class DriveConsole:
         self._cam_y = max(min(self._cam_y, 1), -1)
         self._driver.setCamYaw(self._cam_y)
 
+    def switch_mode(self):
+        self._volta = ~self._volta
+        if self._volta:
+            self._driver.setMode("voltage")
+        else:
+            self._driver.setMode("stop")
+        
+
 
 def raspi_car_demo():
     with driver() as d:
@@ -131,8 +151,8 @@ def raspi_car_demo():
         cam = cv2.VideoCapture(-1)
         no_cam = get_no_cam_img()
         dc = DriveConsole(d)
-        key_dict = {key: func for key, func in zip('WSADIKLJwsadiklj',
-                                                   [dc.forward, dc.backward, dc.left, dc.right,
+        key_dict = {key: func for key, func in zip('WSADVCIKLJwsadvciklj',
+                                                   [dc.forward, dc.backward, dc.left, dc.right, dc.switch_mode, dc.carbreak, 
                                                     dc.cam_up, dc.cam_down, dc.cam_left, dc.cam_right] * 2)}
         # calculate fps
         fps_list = deque(maxlen=20)
